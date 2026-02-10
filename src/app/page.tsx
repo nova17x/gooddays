@@ -26,13 +26,9 @@ export default function Home() {
 
   const handleUpdate = useCallback(
     (id: string, body: string) => {
-      if (body.trim() === "") {
-        removeEntry(today, id);
-      } else {
-        updateEntry(today, id, body);
-      }
+      updateEntry(today, id, body);
     },
-    [today, updateEntry, removeEntry]
+    [today, updateEntry]
   );
 
   if (!isLoaded) {

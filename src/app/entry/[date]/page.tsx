@@ -35,13 +35,9 @@ export default function EntryPage() {
 
   const handleUpdate = useCallback(
     (id: string, body: string) => {
-      if (body.trim() === "") {
-        removeEntry(dateStr, id);
-      } else {
-        updateEntry(dateStr, id, body);
-      }
+      updateEntry(dateStr, id, body);
     },
-    [dateStr, updateEntry, removeEntry]
+    [dateStr, updateEntry]
   );
 
   if (!isLoaded) {
