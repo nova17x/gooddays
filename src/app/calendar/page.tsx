@@ -2,16 +2,28 @@
 
 import { useState } from "react";
 import { useDiaryStore } from "@/hooks/useDiaryStore";
-import { formatMonthJa } from "@/lib/date-utils";
+import { formatMonthJa, formatDateJa } from "@/lib/date-utils";
 import CalendarGrid from "@/components/CalendarGrid";
 import EntryCard from "@/components/EntryCard";
+import Link from "next/link";
 
 export default function CalendarPage() {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
-  const { entries, getEntriesForMonth, isLoaded } = useDiaryStore();
+  const { store, getEntriesForMonth, isLoaded } = useDiaryStore();
   const monthEntries = getEntriesForMonth(year, month);
+
+  // Group entries by date
+  const entriesByDate = new Map<string, typeof monthEntries>();
+  for (const entry of monthEntries) {
+    const existing = entriesByDate.get(entry.date) ?? [];
+    existing.push(entry);
+    entriesByDate.set(entry.date, existing);
+  }
+  const sortedDates = [...entriesByDate.keys()].sort((a, b) =>
+    b.localeCompare(a)
+  );
 
   const goToPrevMonth = () => {
     if (month === 1) {
@@ -56,16 +68,28 @@ export default function CalendarPage() {
       </div>
 
       <div className="bg-bg-card border border-warm-100 rounded-2xl p-4 shadow-sm mb-8">
-        <CalendarGrid year={year} month={month} entries={entries} />
+        <CalendarGrid year={year} month={month} entries={store} />
       </div>
 
-      {monthEntries.length > 0 ? (
-        <div className="space-y-4">
+      {sortedDates.length > 0 ? (
+        <div className="space-y-6">
           <h3 className="text-sm text-text-muted">
             {formatMonthJa(year, month)}の日記 ({monthEntries.length}件)
           </h3>
-          {monthEntries.map((entry) => (
-            <EntryCard key={entry.date} entry={entry} showDate />
+          {sortedDates.map((date) => (
+            <div key={date}>
+              <Link
+                href={`/entry/${date}`}
+                className="text-sm text-text-muted hover:text-warm-500 transition-colors mb-2 block"
+              >
+                {formatDateJa(date)}
+              </Link>
+              <div className="space-y-3">
+                {entriesByDate.get(date)!.map((entry) => (
+                  <EntryCard key={entry.id} entry={entry} />
+                ))}
+              </div>
+            </div>
           ))}
         </div>
       ) : (

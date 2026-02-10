@@ -13,16 +13,16 @@ const chipColors = [
 ];
 
 interface PromptChipsProps {
-  onSelect: (text: string) => void;
+  onSelect: (promptText: string) => void;
 }
 
 export default function PromptChips({ onSelect }: PromptChipsProps) {
   return (
-    <div className="flex flex-wrap gap-2 mb-3">
+    <div className="flex flex-wrap gap-2">
       {PROMPTS.map((prompt, i) => (
         <button
           key={prompt.short}
-          onClick={() => onSelect(prompt.full)}
+          onClick={() => onSelect(prompt.full.trim())}
           className={`text-xs px-3 py-1.5 rounded-full text-text-muted transition-colors cursor-pointer ${chipColors[i % chipColors.length]}`}
         >
           {prompt.short}

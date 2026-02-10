@@ -1,12 +1,13 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useDiaryStore } from "@/hooks/useDiaryStore";
 import { formatDateJa } from "@/lib/date-utils";
 import DiaryEditor from "@/components/DiaryEditor";
 import EntryCard from "@/components/EntryCard";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import PromptChips from "@/components/PromptChips";
 import Link from "next/link";
 
 function isValidDate(dateStr: string): boolean {
@@ -18,28 +19,38 @@ function isValidDate(dateStr: string): boolean {
 
 export default function EntryPage() {
   const params = useParams();
-  const router = useRouter();
   const dateStr = params.date as string;
-  const { getEntry, upsertEntry, removeEntry, isLoaded } = useDiaryStore();
-  const entry = getEntry(dateStr);
-  const [isEditing, setIsEditing] = useState(false);
-  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const { getEntries, addEntry, updateEntry, removeEntry, isLoaded } =
+    useDiaryStore();
+  const entries = getEntries(dateStr);
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [addingPrompt, setAddingPrompt] = useState<string | null>(null);
 
-  const handleSave = useCallback(
+  const handleAdd = useCallback(
     (body: string) => {
+      addEntry(dateStr, addingPrompt ?? "", body);
+      setAddingPrompt(null);
+    },
+    [dateStr, addEntry, addingPrompt]
+  );
+
+  const handleUpdate = useCallback(
+    (id: string, body: string) => {
       if (body.trim() === "") {
-        removeEntry(dateStr);
+        removeEntry(dateStr, id);
       } else {
-        upsertEntry(dateStr, body);
+        updateEntry(dateStr, id, body);
       }
     },
-    [dateStr, upsertEntry, removeEntry]
+    [dateStr, updateEntry, removeEntry]
   );
 
   const handleDelete = () => {
-    removeEntry(dateStr);
-    setShowDeleteDialog(false);
-    router.push("/calendar");
+    if (deletingId) {
+      removeEntry(dateStr, deletingId);
+      setDeletingId(null);
+    }
   };
 
   if (!isLoaded) {
@@ -63,49 +74,78 @@ export default function EntryPage() {
     <div>
       <p className="text-sm text-text-muted mb-6">{formatDateJa(dateStr)}</p>
 
-      {entry && !isEditing ? (
-        <div>
-          <EntryCard entry={entry} />
-          <div className="mt-4 flex justify-center gap-6">
-            <button
-              onClick={() => setIsEditing(true)}
-              className="text-sm text-text-muted hover:text-warm-500 transition-colors cursor-pointer"
-            >
-              編集する
-            </button>
-            <button
-              onClick={() => setShowDeleteDialog(true)}
-              className="text-sm text-text-light hover:text-warm-500 transition-colors cursor-pointer"
-            >
-              削除する
-            </button>
-          </div>
+      {entries.length === 0 && addingPrompt === null && (
+        <p className="text-center text-text-light text-sm py-8">
+          この日の日記はまだありません
+        </p>
+      )}
+
+      <div className="space-y-4">
+        {entries.map((entry) =>
+          editingId === entry.id ? (
+            <DiaryEditor
+              key={entry.id}
+              prompt={entry.prompt}
+              initialBody={entry.body}
+              autoSave
+              onSave={(body) => handleUpdate(entry.id, body)}
+              onCancel={() => setEditingId(null)}
+            />
+          ) : (
+            <div key={entry.id}>
+              <EntryCard
+                entry={entry}
+                onEdit={() => {
+                  setEditingId(entry.id);
+                  setAddingPrompt(null);
+                }}
+              />
+              <div className="mt-1 text-right">
+                <button
+                  onClick={() => setDeletingId(entry.id)}
+                  className="text-xs text-text-light hover:text-warm-500 transition-colors cursor-pointer"
+                >
+                  削除
+                </button>
+              </div>
+            </div>
+          )
+        )}
+      </div>
+
+      {addingPrompt !== null ? (
+        <div className={entries.length > 0 ? "mt-4" : ""}>
+          <DiaryEditor
+            prompt={addingPrompt}
+            onSave={handleAdd}
+            onCancel={() => setAddingPrompt(null)}
+          />
         </div>
       ) : (
-        <div>
-          <DiaryEditor
-            date={dateStr}
-            initialBody={entry?.body ?? ""}
-            onSave={handleSave}
+        <div className={entries.length > 0 ? "mt-6" : "mt-4"}>
+          <PromptChips
+            onSelect={(promptText) => {
+              setEditingId(null);
+              setAddingPrompt(promptText);
+            }}
           />
-          {entry && (
-            <div className="mt-2 text-center">
-              <button
-                onClick={() => setIsEditing(false)}
-                className="text-sm text-text-muted hover:text-warm-500 transition-colors cursor-pointer"
-              >
-                閉じる
-              </button>
-            </div>
-          )}
+          <button
+            onClick={() => {
+              setEditingId(null);
+              setAddingPrompt("");
+            }}
+            className="mt-2 text-xs text-text-light hover:text-warm-500 transition-colors cursor-pointer"
+          >
+            自由に書く
+          </button>
         </div>
       )}
 
-      {showDeleteDialog && (
+      {deletingId && (
         <ConfirmDialog
           message="この日記を削除しますか？"
           onConfirm={handleDelete}
-          onCancel={() => setShowDeleteDialog(false)}
+          onCancel={() => setDeletingId(null)}
         />
       )}
     </div>

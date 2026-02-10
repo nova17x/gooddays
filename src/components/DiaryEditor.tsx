@@ -1,33 +1,40 @@
 "use client";
 
-import { useState, useEffect, useRef, useCallback, useMemo } from "react";
-import PromptChips from "./PromptChips";
+import { useState, useEffect, useRef } from "react";
 import { PLACEHOLDER_MESSAGES } from "@/lib/constants";
 
 interface DiaryEditorProps {
-  date: string;
+  prompt: string;
   initialBody?: string;
   onSave: (body: string) => void;
+  onCancel?: () => void;
+  autoSave?: boolean;
 }
 
 export default function DiaryEditor({
-  date,
+  prompt,
   initialBody = "",
   onSave,
+  onCancel,
+  autoSave = false,
 }: DiaryEditorProps) {
   const [body, setBody] = useState(initialBody);
   const [saved, setSaved] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
-  const placeholder = useMemo(() => {
-    const index = Math.abs(date.split("").reduce((a, c) => a + c.charCodeAt(0), 0)) % PLACEHOLDER_MESSAGES.length;
-    return PLACEHOLDER_MESSAGES[index];
-  }, [date]);
+  const placeholder =
+    PLACEHOLDER_MESSAGES[
+      Math.abs(
+        prompt
+          .split("")
+          .reduce((a, c) => a + c.charCodeAt(0), 0)
+      ) % PLACEHOLDER_MESSAGES.length
+    ];
 
-  // Auto-save with debounce
+  // Auto-save with debounce (only for existing entries)
   useEffect(() => {
-    if (body === initialBody) return;
+    if (!autoSave || body === initialBody) return;
 
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
@@ -44,14 +51,15 @@ export default function DiaryEditor({
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [body, initialBody, onSave]);
+  }, [body, initialBody, onSave, autoSave]);
 
-  const handlePromptSelect = useCallback((text: string) => {
-    setBody((prev) => (prev ? prev + "\n" + text : text));
+  // Focus textarea on mount
+  useEffect(() => {
     textareaRef.current?.focus();
   }, []);
 
   const handleManualSave = () => {
+    if (body.trim() === "") return;
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
@@ -61,14 +69,16 @@ export default function DiaryEditor({
   };
 
   return (
-    <div>
-      <PromptChips onSelect={handlePromptSelect} />
+    <div className="bg-bg-card border border-warm-100 rounded-2xl p-6 shadow-sm">
+      {prompt && (
+        <p className="text-sm text-warm-400 font-medium mb-2">{prompt}</p>
+      )}
       <textarea
         ref={textareaRef}
         value={body}
         onChange={(e) => setBody(e.target.value)}
-        placeholder={placeholder}
-        className="w-full min-h-[200px] p-4 rounded-xl border border-warm-200 bg-white/80 text-text placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-warm-300 focus:border-transparent resize-y leading-relaxed transition-shadow"
+        placeholder={prompt ? "ここに書いてください..." : placeholder}
+        className="w-full min-h-[120px] p-3 rounded-xl border border-warm-200 bg-white/80 text-text placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-warm-300 focus:border-transparent resize-y leading-relaxed transition-shadow"
       />
       <div className="flex items-center justify-between mt-3">
         <span
@@ -80,9 +90,18 @@ export default function DiaryEditor({
         </span>
         <div className="flex items-center gap-3">
           <span className="text-xs text-text-light">{body.length}文字</span>
+          {onCancel && (
+            <button
+              onClick={onCancel}
+              className="px-4 py-2 rounded-full text-sm text-text-muted hover:bg-warm-100 transition-colors cursor-pointer"
+            >
+              キャンセル
+            </button>
+          )}
           <button
             onClick={handleManualSave}
-            className="px-5 py-2 rounded-full bg-gradient-to-r from-warm-400 to-warm-500 text-white text-sm font-medium hover:from-warm-500 hover:to-warm-600 transition-all cursor-pointer"
+            disabled={body.trim() === ""}
+            className="px-5 py-2 rounded-full bg-gradient-to-r from-warm-400 to-warm-500 text-white text-sm font-medium hover:from-warm-500 hover:to-warm-600 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
             保存する
           </button>

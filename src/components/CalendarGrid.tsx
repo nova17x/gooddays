@@ -40,7 +40,7 @@ export default function CalendarGrid({
       </div>
       <div className="grid grid-cols-7 gap-1">
         {days.map((day) => {
-          const hasEntry = day.date in entries;
+          const hasEntry = (entries[day.date]?.length ?? 0) > 0;
           const isToday = day.date === today;
 
           return (
