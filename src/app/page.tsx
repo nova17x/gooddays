@@ -43,7 +43,22 @@ export default function Home() {
 
   return (
     <div>
-      <p className="text-sm text-text-muted mb-6">{formatDateJa(today)}</p>
+      <p className="text-sm text-text-muted mb-4">{formatDateJa(today)}</p>
+
+      {addingPrompt === null && (
+        <div className="mb-6">
+          <PromptChips
+            onSelect={(promptText) => {
+              setEditingId(null);
+              setAddingPrompt(promptText);
+            }}
+            onFreeWrite={() => {
+              setEditingId(null);
+              setAddingPrompt("");
+            }}
+          />
+        </div>
+      )}
 
       {entries.length === 0 && addingPrompt === null && <EmptyState />}
 
@@ -75,25 +90,12 @@ export default function Home() {
         )}
       </div>
 
-      {addingPrompt !== null ? (
+      {addingPrompt !== null && (
         <div className={entries.length > 0 ? "mt-4" : ""}>
           <DiaryEditor
             prompt={addingPrompt}
             onSave={handleAdd}
             onCancel={() => setAddingPrompt(null)}
-          />
-        </div>
-      ) : (
-        <div className={entries.length > 0 ? "mt-6" : "mt-4"}>
-          <PromptChips
-            onSelect={(promptText) => {
-              setEditingId(null);
-              setAddingPrompt(promptText);
-            }}
-            onFreeWrite={() => {
-              setEditingId(null);
-              setAddingPrompt("");
-            }}
           />
         </div>
       )}
