@@ -57,6 +57,10 @@ export default function Home() {
               autoSave
               onSave={(body) => handleUpdate(entry.id, body)}
               onCancel={() => setEditingId(null)}
+              onDelete={() => {
+                removeEntry(today, entry.id);
+                setEditingId(null);
+              }}
             />
           ) : (
             <EntryCard

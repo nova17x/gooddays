@@ -6,7 +6,6 @@ import { useDiaryStore } from "@/hooks/useDiaryStore";
 import { formatDateJa } from "@/lib/date-utils";
 import DiaryEditor from "@/components/DiaryEditor";
 import EntryCard from "@/components/EntryCard";
-import ConfirmDialog from "@/components/ConfirmDialog";
 import PromptChips from "@/components/PromptChips";
 import Link from "next/link";
 
@@ -24,7 +23,6 @@ export default function EntryPage() {
     useDiaryStore();
   const entries = getEntries(dateStr);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
   const [addingPrompt, setAddingPrompt] = useState<string | null>(null);
 
   const handleAdd = useCallback(
@@ -45,13 +43,6 @@ export default function EntryPage() {
     },
     [dateStr, updateEntry, removeEntry]
   );
-
-  const handleDelete = () => {
-    if (deletingId) {
-      removeEntry(dateStr, deletingId);
-      setDeletingId(null);
-    }
-  };
 
   if (!isLoaded) {
     return (
@@ -90,25 +81,20 @@ export default function EntryPage() {
               autoSave
               onSave={(body) => handleUpdate(entry.id, body)}
               onCancel={() => setEditingId(null)}
+              onDelete={() => {
+                removeEntry(dateStr, entry.id);
+                setEditingId(null);
+              }}
             />
           ) : (
-            <div key={entry.id}>
-              <EntryCard
-                entry={entry}
-                onEdit={() => {
-                  setEditingId(entry.id);
-                  setAddingPrompt(null);
-                }}
-              />
-              <div className="mt-1 text-right">
-                <button
-                  onClick={() => setDeletingId(entry.id)}
-                  className="text-xs text-text-light hover:text-warm-500 transition-colors cursor-pointer"
-                >
-                  削除
-                </button>
-              </div>
-            </div>
+            <EntryCard
+              key={entry.id}
+              entry={entry}
+              onEdit={() => {
+                setEditingId(entry.id);
+                setAddingPrompt(null);
+              }}
+            />
           )
         )}
       </div>
@@ -135,14 +121,7 @@ export default function EntryPage() {
           />
         </div>
       )}
-
-      {deletingId && (
-        <ConfirmDialog
-          message="この日記を削除しますか？"
-          onConfirm={handleDelete}
-          onCancel={() => setDeletingId(null)}
-        />
-      )}
     </div>
   );
 }
+

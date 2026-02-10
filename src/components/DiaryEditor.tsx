@@ -2,12 +2,14 @@
 
 import { useState, useEffect, useRef } from "react";
 import { PLACEHOLDER_MESSAGES } from "@/lib/constants";
+import ConfirmDialog from "@/components/ConfirmDialog";
 
 interface DiaryEditorProps {
   prompt: string;
   initialBody?: string;
   onSave: (body: string) => void;
   onCancel?: () => void;
+  onDelete?: () => void;
   autoSave?: boolean;
 }
 
@@ -16,20 +18,22 @@ export default function DiaryEditor({
   initialBody = "",
   onSave,
   onCancel,
+  onDelete,
   autoSave = false,
 }: DiaryEditorProps) {
   const [body, setBody] = useState(initialBody);
   const [saved, setSaved] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
 
   const placeholder =
     PLACEHOLDER_MESSAGES[
-      Math.abs(
-        prompt
-          .split("")
-          .reduce((a, c) => a + c.charCodeAt(0), 0)
-      ) % PLACEHOLDER_MESSAGES.length
+    Math.abs(
+      prompt
+        .split("")
+        .reduce((a, c) => a + c.charCodeAt(0), 0)
+    ) % PLACEHOLDER_MESSAGES.length
     ];
 
   // Auto-save with debounce (only for existing entries)
@@ -82,14 +86,21 @@ export default function DiaryEditor({
       />
       <div className="flex items-center justify-between mt-3">
         <span
-          className={`text-xs transition-opacity ${
-            saved ? "opacity-100 text-warm-500" : "opacity-0"
-          }`}
+          className={`text-xs transition-opacity ${saved ? "opacity-100 text-warm-500" : "opacity-0"
+            }`}
         >
           保存しました
         </span>
         <div className="flex items-center gap-3">
           <span className="text-xs text-text-light">{body.length}文字</span>
+          {onDelete && (
+            <button
+              onClick={() => setShowDeleteConfirm(true)}
+              className="px-4 py-2 rounded-full text-sm text-red-400 hover:bg-red-50 transition-colors cursor-pointer"
+            >
+              削除
+            </button>
+          )}
           {onCancel && (
             <button
               onClick={onCancel}
@@ -107,6 +118,17 @@ export default function DiaryEditor({
           </button>
         </div>
       </div>
+      {showDeleteConfirm && onDelete && (
+        <ConfirmDialog
+          message="この日記を削除しますか？"
+          onConfirm={() => {
+            setShowDeleteConfirm(false);
+            onDelete();
+          }}
+          onCancel={() => setShowDeleteConfirm(false)}
+        />
+      )}
     </div>
   );
 }
+
