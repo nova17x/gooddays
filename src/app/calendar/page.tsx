@@ -2,10 +2,9 @@
 
 import { useState } from "react";
 import { useDiaryStore } from "@/hooks/useDiaryStore";
-import { formatMonthJa, formatDateJa } from "@/lib/date-utils";
+import { formatMonthJa } from "@/lib/date-utils";
 import CalendarGrid from "@/components/CalendarGrid";
-import EntryCard from "@/components/EntryCard";
-import Link from "next/link";
+import DiaryTimeline from "@/components/DiaryTimeline";
 
 export default function CalendarPage() {
   const now = new Date();
@@ -71,32 +70,7 @@ export default function CalendarPage() {
         <CalendarGrid year={year} month={month} entries={store} />
       </div>
 
-      {sortedDates.length > 0 ? (
-        <div className="space-y-6">
-          <h3 className="text-sm text-text-muted">
-            {formatMonthJa(year, month)}の日記 ({monthEntries.length}件)
-          </h3>
-          {sortedDates.map((date) => (
-            <div key={date}>
-              <Link
-                href={`/entry/${date}`}
-                className="text-sm text-text-muted hover:text-warm-500 transition-colors mb-2 block"
-              >
-                {formatDateJa(date)}
-              </Link>
-              <div className="space-y-3">
-                {entriesByDate.get(date)!.map((entry) => (
-                  <EntryCard key={entry.id} entry={entry} />
-                ))}
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <p className="text-center text-text-light text-sm py-8">
-          この月の日記はまだありません
-        </p>
-      )}
+      <DiaryTimeline entriesByDate={entriesByDate} sortedDates={sortedDates} />
     </div>
   );
 }
