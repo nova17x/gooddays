@@ -14,11 +14,20 @@ const chipColors = [
 
 interface PromptChipsProps {
   onSelect: (promptText: string) => void;
+  onFreeWrite?: () => void;
 }
 
-export default function PromptChips({ onSelect }: PromptChipsProps) {
+export default function PromptChips({ onSelect, onFreeWrite }: PromptChipsProps) {
   return (
     <div className="flex flex-wrap gap-2">
+      {onFreeWrite && (
+        <button
+          onClick={onFreeWrite}
+          className="text-xs px-4 py-1.5 rounded-full border-2 border-warm-400 text-warm-600 font-medium hover:bg-warm-400 hover:text-white transition-colors cursor-pointer"
+        >
+          ✏️ 自由に書く
+        </button>
+      )}
       {PROMPTS.map((prompt, i) => (
         <button
           key={prompt.short}

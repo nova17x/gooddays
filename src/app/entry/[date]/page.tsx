@@ -128,16 +128,11 @@ export default function EntryPage() {
               setEditingId(null);
               setAddingPrompt(promptText);
             }}
-          />
-          <button
-            onClick={() => {
+            onFreeWrite={() => {
               setEditingId(null);
               setAddingPrompt("");
             }}
-            className="mt-2 text-xs text-text-light hover:text-warm-500 transition-colors cursor-pointer"
-          >
-            自由に書く
-          </button>
+          />
         </div>
       )}
 
