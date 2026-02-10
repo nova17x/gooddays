@@ -19,11 +19,31 @@
 - Tailwind CSS
 - Zen Maru Gothic フォント
 
-## 開発
+## 使い始め方
+
+### 必要なもの
+
+- [Node.js](https://nodejs.org/) v18 以上
+- npm（Node.js に同梱）
+
+### インストールと起動
 
 ```bash
+# 1. リポジトリをクローン
+git clone https://github.com/nova17x/gooddays.git
+cd gooddays
+
+# 2. 依存パッケージをインストール
 npm install
+
+# 3. 開発サーバーを起動
 npm run dev
 ```
 
-http://localhost:3000 でアクセスできます。
+ブラウザで http://localhost:3000 を開くとアプリが使えます。
+
+### データについて
+
+- 日記データはブラウザの **localStorage** に保存されます
+- サーバーやデータベースは不要です
+- ブラウザのデータを消去すると日記も消えるのでご注意ください

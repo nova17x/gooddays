@@ -16,7 +16,9 @@
       "Bash(npm run build:*)",
       "Bash(npx tsc:*)",
       "Bash(gh auth:*)",
-      "Bash(gh:*)"
+      "Bash(gh:*)",
+      "Bash(~/.local/bin/gh auth status:*)",
+      "Bash(~/.local/bin/gh repo create gooddays --public --description \"Good Days - いいこと日記アプリ\" --source . --push)"
     ]
   }
 }
