@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Zen_Maru_Gothic } from "next/font/google";
+import Header from "@/components/Header";
 import "./globals.css";
 
 const zenMaru = Zen_Maru_Gothic({
@@ -21,9 +22,10 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={`${zenMaru.variable} font-sans antialiased`}>
-        <main className="max-w-2xl mx-auto px-4 py-6">
-          {children}
-        </main>
+        <div className="max-w-2xl mx-auto px-4 py-6">
+          <Header />
+          <main>{children}</main>
+        </div>
       </body>
     </html>
   );
