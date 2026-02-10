@@ -7,7 +7,7 @@ export default function EmptyState() {
         </span>
       </div>
       <p className="text-text-muted text-lg">
-        今日の良いことを書いてみましょう
+        今日あった良いことを書いてみましょう
       </p>
       <p className="text-text-light text-sm mt-1">
         どんな小さなことでも大丈夫です
