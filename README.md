@@ -1,36 +1,29 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Good Days - いいこと日記
 
-## Getting Started
+今日あった良いことを書き留める日記アプリ。
 
-First, run the development server:
+温かみのあるUIデザインとポジティブなプロンプトで、毎日の良いことを記録する習慣をサポートします。
+
+## 機能
+
+- 今日の日記を書く・編集する
+- プロンプトチップで書き始めのきっかけを提供
+- カレンダーで過去の日記を振り返る
+- オートセーブで書き心地を大切に
+- データはブラウザのlocalStorageに保存（サーバー不要）
+
+## 技術スタック
+
+- Next.js (App Router)
+- TypeScript
+- Tailwind CSS
+- Zen Maru Gothic フォント
+
+## 開発
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+http://localhost:3000 でアクセスできます。
