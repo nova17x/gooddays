@@ -3,7 +3,7 @@ export const APP_TAGLINE = "いいこと日記";
 export const STORAGE_KEY = "gooddays-entries";
 
 export const PROMPTS = [
-  { short: "嬉しかったこと", full: "今日嬉しかったことは？\n" },
+  { short: "嬉しかったこと", full: "今日嬉しかったことはありますか？\n" },
   { short: "感謝", full: "感謝したいことはありますか？\n" },
   { short: "小さな幸せ", full: "小さな幸せを見つけましたか？\n" },
   { short: "成長", full: "今日成長できたと感じたことはありますか？\n" },
