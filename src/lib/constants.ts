@@ -6,10 +6,10 @@ export const PROMPTS = [
   { short: "嬉しかったこと", full: "今日嬉しかったことは？\n" },
   { short: "感謝", full: "感謝したいことはありますか？\n" },
   { short: "小さな幸せ", full: "小さな幸せを見つけましたか？\n" },
-  { short: "成長", full: "今日成長できたと感じたことは？\n" },
-  { short: "美味しかったもの", full: "今日美味しかったものは？\n" },
+  { short: "成長", full: "今日成長できたと感じたことはありますか？\n" },
+  { short: "美味しかったもの", full: "今日美味しかったものは何ですか？\n" },
   { short: "楽しかったこと", full: "今日楽しかったことは？\n" },
-  { short: "誰かへの感謝", full: "誰かに「ありがとう」と言いたいことは？\n" },
+  { short: "誰かへの感謝", full: "誰かに「ありがとう」と言いたいですか？\n" },
 ];
 
 export const PLACEHOLDER_MESSAGES = [
