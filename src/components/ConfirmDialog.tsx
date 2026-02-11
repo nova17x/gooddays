@@ -2,12 +2,14 @@
 
 interface ConfirmDialogProps {
   message: string;
+  confirmLabel?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
 
 export default function ConfirmDialog({
   message,
+  confirmLabel = "削除する",
   onConfirm,
   onCancel,
 }: ConfirmDialogProps) {
@@ -32,7 +34,7 @@ export default function ConfirmDialog({
             onClick={onConfirm}
             className="px-5 py-2 min-h-[44px] rounded-full text-sm bg-warm-500 text-white hover:bg-warm-600 transition-colors cursor-pointer"
           >
-            削除する
+            {confirmLabel}
           </button>
         </div>
       </div>
