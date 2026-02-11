@@ -26,4 +26,12 @@ body {
   background: var(--color-bg);
   color: var(--color-text);
   min-height: 100vh;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Prevent iOS Safari auto-zoom on input focus */
+input,
+textarea,
+select {
+  font-size: 16px;
 }

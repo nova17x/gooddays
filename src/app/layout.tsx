@@ -14,6 +14,12 @@ export const metadata: Metadata = {
   description: "今日あった良いことを書き留める日記アプリ",
 };
 
+export const viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+};
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -22,7 +28,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={`${zenMaru.variable} font-sans antialiased`}>
-        <div className="max-w-2xl mx-auto px-4 py-6">
+        <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-6">
           <Header />
           <main>{children}</main>
         </div>

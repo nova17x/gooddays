@@ -73,7 +73,7 @@ export default function DiaryEditor({
   };
 
   return (
-    <div className="bg-bg-card border border-warm-100 rounded-2xl p-6 shadow-sm">
+    <div className="bg-bg-card border border-warm-100 rounded-2xl p-4 sm:p-6 shadow-sm">
       {prompt && (
         <p className="text-sm text-warm-400 font-medium mb-2">{prompt}</p>
       )}
@@ -84,19 +84,19 @@ export default function DiaryEditor({
         placeholder={prompt ? "ここに書いてください..." : placeholder}
         className="w-full min-h-[120px] p-3 rounded-xl border border-warm-200 bg-white/80 text-text placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-warm-300 focus:border-transparent resize-y leading-relaxed transition-shadow"
       />
-      <div className="flex items-center justify-between mt-3">
+      <div className="flex flex-wrap items-center justify-between mt-3 gap-2">
         <span
           className={`text-xs transition-opacity ${saved ? "opacity-100 text-warm-500" : "opacity-0"
             }`}
         >
           保存しました
         </span>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap ml-auto">
           <span className="text-xs text-text-light">{body.length}文字</span>
           {onDelete && (
             <button
               onClick={() => setShowDeleteConfirm(true)}
-              className="px-4 py-2 rounded-full text-sm text-red-400 hover:bg-red-50 transition-colors cursor-pointer"
+              className="px-4 py-2 min-h-[44px] rounded-full text-sm text-red-400 hover:bg-red-50 transition-colors cursor-pointer"
             >
               削除
             </button>
@@ -104,7 +104,7 @@ export default function DiaryEditor({
           {onCancel && (
             <button
               onClick={onCancel}
-              className="px-4 py-2 rounded-full text-sm text-text-muted hover:bg-warm-100 transition-colors cursor-pointer"
+              className="px-4 py-2 min-h-[44px] rounded-full text-sm text-text-muted hover:bg-warm-100 transition-colors cursor-pointer"
             >
               キャンセル
             </button>
@@ -112,7 +112,7 @@ export default function DiaryEditor({
           <button
             onClick={handleManualSave}
             disabled={body.trim() === ""}
-            className="px-5 py-2 rounded-full bg-gradient-to-r from-warm-400 to-warm-500 text-white text-sm font-medium hover:from-warm-500 hover:to-warm-600 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+            className="px-5 py-2 min-h-[44px] rounded-full bg-gradient-to-r from-warm-400 to-warm-500 text-white text-sm font-medium hover:from-warm-500 hover:to-warm-600 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed w-full sm:w-auto"
           >
             保存する
           </button>

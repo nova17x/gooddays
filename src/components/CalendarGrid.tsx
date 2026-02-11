@@ -22,23 +22,22 @@ export default function CalendarGrid({
 
   return (
     <div>
-      <div className="grid grid-cols-7 gap-1 mb-1">
+      <div className="grid grid-cols-7 gap-0.5 sm:gap-1 mb-1">
         {WEEKDAYS.map((day, i) => (
           <div
             key={day}
-            className={`text-center text-xs py-1 ${
-              i === 0
+            className={`text-center text-xs py-1 ${i === 0
                 ? "text-warm-400"
                 : i === 6
                   ? "text-warm-400"
                   : "text-text-muted"
-            }`}
+              }`}
           >
             {day}
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-0.5 sm:gap-1">
         {days.map((day) => {
           const hasEntry = (entries[day.date]?.length ?? 0) > 0;
           const isToday = day.date === today;
@@ -47,11 +46,10 @@ export default function CalendarGrid({
             <Link
               key={day.date}
               href={`/entry/${day.date}`}
-              className={`relative aspect-square flex flex-col items-center justify-center rounded-lg text-sm transition-colors ${
-                day.isCurrentMonth
+              className={`relative aspect-square flex flex-col items-center justify-center rounded-lg text-sm min-h-[44px] transition-colors ${day.isCurrentMonth
                   ? "hover:bg-warm-100"
                   : "text-text-light/50 hover:bg-warm-50"
-              } ${isToday ? "ring-2 ring-warm-300 font-bold" : ""}`}
+                } ${isToday ? "ring-2 ring-warm-300 font-bold" : ""}`}
             >
               <span>{day.day}</span>
               {hasEntry && (

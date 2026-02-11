@@ -49,7 +49,7 @@ export default function DiaryTimeline({
                                 {entries.map((entry) => (
                                     <div
                                         key={entry.id}
-                                        className="bg-bg-card border border-warm-100 rounded-xl p-4 shadow-sm"
+                                        className="bg-bg-card border border-warm-100 rounded-xl p-3 sm:p-4 shadow-sm"
                                     >
                                         {entry.prompt && (
                                             <p className="text-xs text-warm-400 font-medium mb-1">

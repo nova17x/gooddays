@@ -23,7 +23,7 @@ export default function PromptChips({ onSelect, onFreeWrite }: PromptChipsProps)
       {onFreeWrite && (
         <button
           onClick={onFreeWrite}
-          className="text-xs px-4 py-1.5 rounded-full border-2 border-warm-400 text-warm-600 font-medium hover:bg-warm-400 hover:text-white transition-colors cursor-pointer"
+          className="text-xs px-4 py-2 rounded-full border-2 border-warm-400 text-warm-600 font-medium hover:bg-warm-400 hover:text-white transition-colors cursor-pointer"
         >
           ✏️ 自由に書く
         </button>
@@ -32,7 +32,7 @@ export default function PromptChips({ onSelect, onFreeWrite }: PromptChipsProps)
         <button
           key={prompt.short}
           onClick={() => onSelect(prompt.full.trim())}
-          className={`text-xs px-3 py-1.5 rounded-full text-text-muted transition-colors cursor-pointer ${chipColors[i % chipColors.length]}`}
+          className={`text-xs px-3.5 py-2 rounded-full text-text-muted transition-colors cursor-pointer ${chipColors[i % chipColors.length]}`}
         >
           {prompt.short}
         </button>

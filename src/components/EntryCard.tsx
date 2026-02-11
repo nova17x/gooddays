@@ -15,7 +15,7 @@ export default function EntryCard({
   onEdit,
 }: EntryCardProps) {
   return (
-    <div className="bg-bg-card border border-warm-100 rounded-2xl p-6 shadow-sm">
+    <div className="bg-bg-card border border-warm-100 rounded-2xl p-4 sm:p-6 shadow-sm">
       <div className="flex items-start justify-between">
         {showDate && (
           <p className="text-sm text-text-muted mb-3">

@@ -53,20 +53,20 @@ export default function CalendarPage() {
       <div className="flex items-center justify-between mb-6">
         <button
           onClick={goToPrevMonth}
-          className="p-2 rounded-full hover:bg-warm-100 text-text-muted transition-colors cursor-pointer"
+          className="p-3 rounded-full hover:bg-warm-100 text-text-muted transition-colors cursor-pointer"
         >
           &larr;
         </button>
         <h2 className="text-lg font-medium">{formatMonthJa(year, month)}</h2>
         <button
           onClick={goToNextMonth}
-          className="p-2 rounded-full hover:bg-warm-100 text-text-muted transition-colors cursor-pointer"
+          className="p-3 rounded-full hover:bg-warm-100 text-text-muted transition-colors cursor-pointer"
         >
           &rarr;
         </button>
       </div>
 
-      <div className="bg-bg-card border border-warm-100 rounded-2xl p-4 shadow-sm mb-8">
+      <div className="bg-bg-card border border-warm-100 rounded-2xl p-3 sm:p-4 shadow-sm mb-8">
         <CalendarGrid year={year} month={month} entries={store} />
       </div>
 
