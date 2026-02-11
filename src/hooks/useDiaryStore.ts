@@ -123,6 +123,18 @@ export function useDiaryStore() {
     [store]
   );
 
+  const replaceStore = useCallback((newStore: DiaryStore) => {
+    setStore(newStore);
+  }, []);
+
+  const getStats = useCallback((): { dayCount: number; entryCount: number } => {
+    const days = Object.keys(store).filter(
+      (key) => store[key] && store[key].length > 0
+    );
+    const entries = days.reduce((sum, key) => sum + store[key].length, 0);
+    return { dayCount: days.length, entryCount: entries };
+  }, [store]);
+
   return {
     store,
     isLoaded,
@@ -132,5 +144,7 @@ export function useDiaryStore() {
     removeEntry,
     getEntriesForMonth,
     hasEntry,
+    replaceStore,
+    getStats,
   };
 }
