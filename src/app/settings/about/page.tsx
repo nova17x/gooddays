@@ -15,7 +15,7 @@ export default function AboutPage() {
                 </Link>
             </div>
 
-            <h1 className="text-lg font-medium mb-6">💡 このアプリについて</h1>
+            <h1 className="text-lg font-medium mb-6">このアプリについて</h1>
 
             {/* App Info */}
             <div className="bg-bg-card border border-warm-100 rounded-2xl p-5 sm:p-6 shadow-sm text-center mb-4">

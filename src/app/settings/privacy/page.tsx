@@ -17,7 +17,7 @@ const SECTIONS = [
             "本アプリでは、Google Analyticsなどのアクセス解析ツールや広告トラッキングは一切使用していません。ユーザーの行動が追跡・記録されることはありません。",
     },
     {
-        title: "透明性（オープンソース）について",
+        title: "透明性について",
         content:
             "本アプリのソースコードはGitHub上に公開されています。どなたでもコードの内容を確認し、データがどのように処理されているかを検証することができます。",
         link: {
@@ -70,7 +70,7 @@ export default function PrivacyPolicyPage() {
                 </Link>
             </div>
 
-            <h1 className="text-lg font-medium mb-2">🔒 プライバシーポリシー</h1>
+            <h1 className="text-lg font-medium mb-2">プライバシーポリシー</h1>
             <p className="text-xs text-text-light mb-6">
                 制定日: 2026年2月12日 ｜ 最終更新日: 2026年2月12日
             </p>

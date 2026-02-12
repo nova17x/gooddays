@@ -41,7 +41,7 @@ export default function QAPage() {
                 </Link>
             </div>
 
-            <h1 className="text-lg font-medium mb-6">❓ Q&A</h1>
+            <h1 className="text-lg font-medium mb-6">Q&A</h1>
 
             <div className="space-y-3">
                 {QA_ITEMS.map((item, i) => (
