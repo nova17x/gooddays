@@ -91,7 +91,7 @@ export default function DiaryEditor({
         >
           保存しました
         </span>
-        <div className="flex items-center gap-2 sm:gap-3 flex-wrap sm:flex-nowrap ml-auto">
+        <div className="flex items-center gap-2 sm:gap-3 ml-auto">
           <span className="text-xs text-text-light">{body.length}文字</span>
           {onDelete && (
             <button
@@ -112,7 +112,7 @@ export default function DiaryEditor({
           <button
             onClick={handleManualSave}
             disabled={body.trim() === ""}
-            className="px-5 py-2 min-h-[44px] rounded-full bg-gradient-to-r from-warm-400 to-warm-500 text-white text-sm font-medium hover:from-warm-500 hover:to-warm-600 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed w-full sm:w-auto"
+            className="px-5 py-2 min-h-[44px] rounded-full bg-gradient-to-r from-warm-400 to-warm-500 text-white text-sm font-medium hover:from-warm-500 hover:to-warm-600 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
           >
             保存する
           </button>
