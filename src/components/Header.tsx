@@ -42,7 +42,7 @@ export default function Header() {
               : "text-text-muted hover:text-text hover:bg-warm-100"
               }`}
           >
-            ⚙
+            設定
           </Link>
         </nav>
       </div>
