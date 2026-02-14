@@ -5,13 +5,10 @@ import { PLACEHOLDER_MESSAGES } from "@/lib/constants";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import confetti from "canvas-confetti";
 
-const MOODS = ["😊", "😐", "😢", "😡", "😌", "🤔", "😴", "🤩"];
-
 interface DiaryEditorProps {
   prompt: string;
   initialBody?: string;
-  initialMood?: string;
-  onSave: (body: string, mood?: string) => void;
+  onSave: (body: string) => void;
   onCancel?: () => void;
   onDelete?: () => void;
   autoSave?: boolean;
@@ -20,14 +17,12 @@ interface DiaryEditorProps {
 export default function DiaryEditor({
   prompt,
   initialBody = "",
-  initialMood,
   onSave,
   onCancel,
   onDelete,
   autoSave = false,
 }: DiaryEditorProps) {
   const [body, setBody] = useState(initialBody);
-  const [mood, setMood] = useState<string | undefined>(initialMood);
   const [saved, setSaved] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -65,7 +60,7 @@ export default function DiaryEditor({
     }
 
     saveTimeoutRef.current = setTimeout(() => {
-      onSave(body, mood);
+      onSave(body);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     }, 1000);
@@ -75,7 +70,7 @@ export default function DiaryEditor({
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [body, mood, onSave, autoSave]);
+  }, [body, onSave, autoSave]);
 
   // Focus textarea on mount
   useEffect(() => {
@@ -89,7 +84,7 @@ export default function DiaryEditor({
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
-    onSave(body, mood);
+    onSave(body);
     setSaved(true);
 
     // Trigger confetti
@@ -110,20 +105,6 @@ export default function DiaryEditor({
         {prompt && (
           <p className="text-sm text-warm-400 font-medium">{prompt}</p>
         )}
-        <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-none">
-          {MOODS.map((m) => (
-            <button
-              key={m}
-              onClick={() => setMood(m)}
-              className={`text-2xl w-10 h-10 flex items-center justify-center rounded-full transition-all ${mood === m
-                ? "bg-warm-100 scale-110 shadow-sm"
-                : "hover:bg-warm-50 opacity-70 hover:opacity-100"
-                }`}
-            >
-              {m}
-            </button>
-          ))}
-        </div>
       </div>
 
       <textarea
