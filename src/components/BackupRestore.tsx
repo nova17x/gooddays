@@ -1,161 +1,174 @@
 "use client";
 
-import { useState, useRef } from "react";
-import { exportDiary, importDiary, mergeDiaryStores, getLastBackupDate, getDiaryStats } from "@/lib/backup";
-import type { DiaryStore } from "@/lib/types";
-import ConfirmDialog from "@/components/ConfirmDialog";
+import { useState } from "react";
+import { db } from "@/lib/db";
+import { exportDiary, importDiary, mergeDiaryStores, entriesToStore } from "@/lib/backup";
+import { useDiagramStats } from "@/hooks/useDiaryQueries";
+import { useDiaryActions } from "@/hooks/useDiaryStore";
 
-interface BackupRestoreProps {
-    store: DiaryStore;
-    onImport: (newStore: DiaryStore) => void;
-}
+export default function BackupRestore() {
+    const stats = useDiagramStats();
+    const { replaceStore } = useDiaryActions();
+    const [isExporting, setIsExporting] = useState(false);
+    const [isImporting, setIsImporting] = useState(false);
+    const [message, setMessage] = useState<{
+        type: "success" | "error";
+        text: string;
+    } | null>(null);
 
-export default function BackupRestore({ store, onImport }: BackupRestoreProps) {
-    const [message, setMessage] = useState<{ text: string; type: "success" | "error" } | null>(null);
-    const [showConfirm, setShowConfirm] = useState(false);
-    const [pendingStore, setPendingStore] = useState<DiaryStore | null>(null);
-    const fileInputRef = useRef<HTMLInputElement>(null);
-
-    const lastBackup = getLastBackupDate();
-    const stats = getDiaryStats(store);
-
-    const handleExport = () => {
-        exportDiary(store);
-        setMessage({ text: "バックアップしました ✓", type: "success" });
-        setTimeout(() => setMessage(null), 3000);
+    const handleExport = async () => {
+        try {
+            setIsExporting(true);
+            setMessage(null);
+            // Fetch all entries on demand
+            const entries = await db.entries.toArray();
+            exportDiary(entries);
+            setMessage({ type: "success", text: "エクスポートが完了しました" });
+        } catch (error) {
+            console.error(error);
+            setMessage({ type: "error", text: "エクスポートに失敗しました" });
+        } finally {
+            setIsExporting(false);
+        }
     };
 
-    const handleFileSelect = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const handleImport = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0];
         if (!file) return;
 
+        if (!confirm("現在のデータに上書き、またはマージしますか？\n（念のため、事前にエクスポートすることをお勧めします）")) {
+            e.target.value = "";
+            return;
+        }
+
         try {
-            const imported = await importDiary(file);
-            const importedStats = getDiaryStats(imported);
-            setPendingStore(imported);
-            setShowConfirm(true);
+            setIsImporting(true);
             setMessage(null);
-        } catch (err) {
+
+            const importedStore = await importDiary(file);
+
+            // We need to merge with existing data
+            const existingEntries = await db.entries.toArray();
+            const existingStore = entriesToStore(existingEntries);
+
+            const mergedStore = mergeDiaryStores(existingStore, importedStore);
+
+            await replaceStore(mergedStore);
+
+            setMessage({ type: "success", text: "インポートが完了しました" });
+        } catch (error) {
+            console.error(error);
             setMessage({
-                text: err instanceof Error ? err.message : "ファイルの読み込みに失敗しました",
                 type: "error",
+                text: error instanceof Error ? error.message : "インポートに失敗しました",
             });
-        }
-
-        // Reset file input
-        if (fileInputRef.current) {
-            fileInputRef.current.value = "";
+        } finally {
+            setIsImporting(false);
+            e.target.value = "";
         }
     };
 
-    const handleConfirmImport = () => {
-        if (!pendingStore) return;
-
-        const merged = mergeDiaryStores(store, pendingStore);
-        onImport(merged);
-
-        const mergedStats = getDiaryStats(merged);
-        setMessage({
-            text: `復元しました ✓（${mergedStats.dayCount}日分、${mergedStats.entryCount}件）`,
-            type: "success",
-        });
-        setPendingStore(null);
-        setShowConfirm(false);
-        setTimeout(() => setMessage(null), 4000);
-    };
+    if (!stats) {
+        return <div className="p-4 text-center text-text-muted">読み込み中...</div>;
+    }
 
     return (
-        <div className="space-y-6">
-            {/* Stats */}
-            <div className="bg-bg-card border border-warm-100 rounded-2xl p-4 sm:p-6 shadow-sm">
-                <h2 className="text-base font-medium mb-3">日記データ</h2>
-                <div className="flex gap-6 text-sm text-text-muted">
-                    <div>
-                        <span className="text-2xl font-bold text-warm-500">{stats.dayCount}</span>
-                        <span className="ml-1">日分</span>
+        <div className="space-y-8">
+            {/* Stats Card */}
+            <section className="bg-bg-card border border-warm-100 rounded-2xl p-6 shadow-sm">
+                <h3 className="text-sm font-bold text-text-muted uppercase tracking-wider mb-4">
+                    データ統計
+                </h3>
+                <div className="grid grid-cols-2 gap-4">
+                    <div className="bg-warm-50 rounded-xl p-4 text-center">
+                        <p className="text-xs text-text-muted mb-1">日記を書いた日数</p>
+                        <p className="text-2xl font-bold text-warm-600">
+                            {stats.dayCount}
+                            <span className="text-sm font-normal text-text-muted ml-1">日</span>
+                        </p>
                     </div>
-                    <div>
-                        <span className="text-2xl font-bold text-warm-500">{stats.entryCount}</span>
-                        <span className="ml-1">件のエントリ</span>
+                    <div className="bg-warm-50 rounded-xl p-4 text-center">
+                        <p className="text-xs text-text-muted mb-1">総エントリー数</p>
+                        <p className="text-2xl font-bold text-warm-600">
+                            {stats.entryCount}
+                            <span className="text-sm font-normal text-text-muted ml-1">件</span>
+                        </p>
                     </div>
                 </div>
-                {lastBackup && (
-                    <p className="text-xs text-text-light mt-3">
-                        最終バックアップ: {lastBackup.toLocaleDateString("ja-JP", {
-                            year: "numeric",
-                            month: "long",
-                            day: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                        })}
-                    </p>
-                )}
-                {!lastBackup && stats.entryCount > 0 && (
-                    <p className="text-xs text-warm-400 mt-3">
-                        まだバックアップを取っていません
-                    </p>
-                )}
-            </div>
+            </section>
 
-            {/* Export */}
-            <div className="bg-bg-card border border-warm-100 rounded-2xl p-4 sm:p-6 shadow-sm">
-                <h2 className="text-base font-medium mb-2">バックアップ</h2>
-                <p className="text-sm text-text-muted mb-4">
-                    日記データをJSONファイルとしてダウンロードします。
-                    ファイル名は常に同じなので、上書き保存するだけでOKです。
-                </p>
-                <button
-                    onClick={handleExport}
-                    disabled={stats.entryCount === 0}
-                    className="px-5 py-2 min-h-[44px] rounded-full bg-gradient-to-r from-warm-400 to-warm-500 text-white text-sm font-medium hover:from-warm-500 hover:to-warm-600 transition-all cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
-                >
-                    📥 バックアップをダウンロード
-                </button>
-            </div>
+            {/* Backup Actions */}
+            <section className="bg-bg-card border border-warm-100 rounded-2xl p-6 shadow-sm">
+                <h3 className="text-sm font-bold text-text-muted uppercase tracking-wider mb-4">
+                    バックアップと復元
+                </h3>
 
-            {/* Import */}
-            <div className="bg-bg-card border border-warm-100 rounded-2xl p-4 sm:p-6 shadow-sm">
-                <h2 className="text-base font-medium mb-2">復元</h2>
-                <p className="text-sm text-text-muted mb-4">
-                    バックアップファイルから日記を復元します。
-                    既存のデータとマージされるので、データが消えることはありません。
-                </p>
-                <label className="inline-flex items-center px-5 py-2 min-h-[44px] rounded-full border-2 border-warm-300 text-warm-600 text-sm font-medium hover:bg-warm-100 transition-colors cursor-pointer">
-                    📤 バックアップから復元
-                    <input
-                        ref={fileInputRef}
-                        type="file"
-                        accept=".json"
-                        onChange={handleFileSelect}
-                        className="hidden"
-                    />
-                </label>
-            </div>
+                <div className="space-y-6">
+                    {/* Export */}
+                    <div>
+                        <p className="text-sm text-text mb-3">
+                            日記データをJSONファイルとしてダウンロードします。定期的なバックアップをお勧めします。
+                        </p>
+                        <button
+                            onClick={handleExport}
+                            disabled={isExporting}
+                            className="w-full sm:w-auto px-6 py-2.5 bg-warm-500 text-white font-medium rounded-full hover:bg-warm-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors shadow-sm flex items-center justify-center gap-2"
+                        >
+                            {isExporting ? (
+                                <>
+                                    <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                                    エクスポート中...
+                                </>
+                            ) : (
+                                <>
+                                    <span>⬇️</span> バックアップをダウンロード
+                                </>
+                            )}
+                        </button>
+                    </div>
 
-            {/* Message */}
-            {message && (
-                <div
-                    className={`text-sm text-center py-3 px-4 rounded-xl ${message.type === "success"
-                            ? "bg-green-50 text-green-700"
-                            : "bg-red-50 text-red-600"
-                        }`}
-                >
-                    {message.text}
+                    <div className="border-t border-warm-100" />
+
+                    {/* Import */}
+                    <div>
+                        <p className="text-sm text-text mb-3">
+                            バックアップファイル（.json）を読み込んで復元します。
+                        </p>
+                        <label className="inline-block w-full sm:w-auto">
+                            <input
+                                type="file"
+                                accept=".json"
+                                onChange={handleImport}
+                                disabled={isImporting}
+                                className="hidden"
+                            />
+                            <span className="w-full sm:w-auto px-6 py-2.5 bg-white border border-warm-200 text-text font-medium rounded-full hover:bg-warm-50 hover:border-warm-300 disabled:opacity-50 disabled:cursor-not-allowed transition-all cursor-pointer shadow-sm flex items-center justify-center gap-2">
+                                {isImporting ? (
+                                    <>
+                                        <span className="w-4 h-4 border-2 border-warm-400 border-t-transparent rounded-full animate-spin" />
+                                        インポート中...
+                                    </>
+                                ) : (
+                                    <>
+                                        <span>⬆️</span> バックアップから復元
+                                    </>
+                                )}
+                            </span>
+                        </label>
+                    </div>
+
+                    {message && (
+                        <div
+                            className={`p-4 rounded-xl text-sm ${message.type === "success"
+                                ? "bg-green-50 text-green-700 border border-green-100"
+                                : "bg-red-50 text-red-700 border border-red-100"
+                                } animate-in fade-in slide-in-from-top-2`}
+                        >
+                            {message.text}
+                        </div>
+                    )}
                 </div>
-            )}
-
-            {/* Import Confirm Dialog */}
-            {showConfirm && pendingStore && (
-                <ConfirmDialog
-                    message={`バックアップから${getDiaryStats(pendingStore).entryCount}件のエントリを復元しますか？既存のデータは保持されます。`}
-                    confirmLabel="復元する"
-                    onConfirm={handleConfirmImport}
-                    onCancel={() => {
-                        setShowConfirm(false);
-                        setPendingStore(null);
-                    }}
-                />
-            )}
+            </section>
         </div>
     );
 }

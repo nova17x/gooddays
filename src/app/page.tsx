@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useCallback } from "react";
-import { useDiaryStore } from "@/hooks/useDiaryStore";
+import { useDiaryActions } from "@/hooks/useDiaryStore";
+import { useDateEntries } from "@/hooks/useDiaryQueries";
 import { getTodayString, formatDateJa } from "@/lib/date-utils";
 import DiaryEditor from "@/components/DiaryEditor";
 import EntryCard from "@/components/EntryCard";
@@ -10,9 +11,9 @@ import PromptChips from "@/components/PromptChips";
 
 export default function Home() {
   const today = getTodayString();
-  const { getEntries, addEntry, updateEntry, removeEntry, isLoaded } =
-    useDiaryStore();
-  const entries = getEntries(today);
+  const { addEntry, updateEntry, removeEntry } = useDiaryActions();
+  const entries = useDateEntries(today);
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addingPrompt, setAddingPrompt] = useState<string | null>(null);
 
@@ -31,7 +32,7 @@ export default function Home() {
     [today, updateEntry]
   );
 
-  if (!isLoaded) {
+  if (!entries) {
     return (
       <div className="text-center py-20 text-text-light">読み込み中...</div>
     );

@@ -1,28 +1,19 @@
 "use client";
 
 import { useState } from "react";
-import { useDiaryStore } from "@/hooks/useDiaryStore";
+import { useMonthEntries, useCalendarEntryDates } from "@/hooks/useDiaryQueries";
 import { formatMonthJa } from "@/lib/date-utils";
 import CalendarGrid from "@/components/CalendarGrid";
 import DiaryTimeline from "@/components/DiaryTimeline";
+import type { DiaryEntry } from "@/lib/types";
 
 export default function CalendarPage() {
   const now = new Date();
   const [year, setYear] = useState(now.getFullYear());
   const [month, setMonth] = useState(now.getMonth() + 1);
-  const { store, getEntriesForMonth, isLoaded } = useDiaryStore();
-  const monthEntries = getEntriesForMonth(year, month);
 
-  // Group entries by date
-  const entriesByDate = new Map<string, typeof monthEntries>();
-  for (const entry of monthEntries) {
-    const existing = entriesByDate.get(entry.date) ?? [];
-    existing.push(entry);
-    entriesByDate.set(entry.date, existing);
-  }
-  const sortedDates = [...entriesByDate.keys()].sort((a, b) =>
-    b.localeCompare(a)
-  );
+  const monthEntries = useMonthEntries(year, month);
+  const entryDates = useCalendarEntryDates(year, month);
 
   const goToPrevMonth = () => {
     if (month === 1) {
@@ -42,11 +33,22 @@ export default function CalendarPage() {
     }
   };
 
-  if (!isLoaded) {
+  if (!monthEntries || !entryDates) {
     return (
       <div className="text-center py-20 text-text-light">読み込み中...</div>
     );
   }
+
+  // Group entries by date for Timeline
+  const entriesByDate = new Map<string, DiaryEntry[]>();
+  for (const entry of monthEntries) {
+    const existing = entriesByDate.get(entry.date) ?? [];
+    existing.push(entry);
+    entriesByDate.set(entry.date, existing);
+  }
+  const sortedDates = [...entriesByDate.keys()].sort((a, b) =>
+    b.localeCompare(a)
+  );
 
   return (
     <div>
@@ -67,7 +69,7 @@ export default function CalendarPage() {
       </div>
 
       <div className="bg-bg-card border border-warm-100 rounded-2xl p-3 sm:p-4 shadow-sm mb-8">
-        <CalendarGrid year={year} month={month} entries={store} />
+        <CalendarGrid year={year} month={month} entryDates={entryDates} />
       </div>
 
       <DiaryTimeline entriesByDate={entriesByDate} sortedDates={sortedDates} />

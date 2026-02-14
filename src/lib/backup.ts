@@ -11,16 +11,30 @@ interface BackupData {
     entries: DiaryStore;
 }
 
+// --- Conversion ---
+
+export function entriesToStore(entries: DiaryEntry[]): DiaryStore {
+    const store: DiaryStore = {};
+    for (const entry of entries) {
+        if (!store[entry.date]) {
+            store[entry.date] = [];
+        }
+        store[entry.date].push(entry);
+    }
+    return store;
+}
+
 // --- Export ---
 
-export function exportDiary(store: DiaryStore): void {
-    const data: BackupData = {
+export function exportDiary(data: DiaryStore | DiaryEntry[]): void {
+    const store = Array.isArray(data) ? entriesToStore(data) : data;
+    const backup: BackupData = {
         version: 1,
         exportedAt: new Date().toISOString(),
         entries: store,
     };
 
-    const blob = new Blob([JSON.stringify(data, null, 2)], {
+    const blob = new Blob([JSON.stringify(backup, null, 2)], {
         type: "application/json",
     });
 
@@ -117,15 +131,20 @@ export function shouldShowBackupReminder(totalEntryCount: number): boolean {
 
 // --- Stats ---
 
-export function getDiaryStats(store: DiaryStore): {
+export function getDiaryStats(data: DiaryStore | DiaryEntry[]): {
     dayCount: number;
     entryCount: number;
 } {
-    const days = Object.keys(store).filter(
-        (key) => store[key] && store[key].length > 0
+    if (Array.isArray(data)) {
+        const days = new Set(data.map((e) => e.date));
+        return { dayCount: days.size, entryCount: data.length };
+    }
+
+    const days = Object.keys(data).filter(
+        (key) => data[key] && data[key].length > 0
     );
-    const entries = days.reduce((sum, key) => sum + store[key].length, 0);
-    return { dayCount: days.length, entryCount: entries };
+    const mainEntries = days.reduce((sum, key) => sum + data[key].length, 0);
+    return { dayCount: days.length, entryCount: mainEntries };
 }
 
 // --- Validation ---

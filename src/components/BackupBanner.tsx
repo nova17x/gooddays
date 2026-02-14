@@ -2,23 +2,24 @@
 
 import { useState, useEffect } from "react";
 import { shouldShowBackupReminder, exportDiary } from "@/lib/backup";
-import { useDiaryStore } from "@/hooks/useDiaryStore";
+import { useDiagramStats } from "@/hooks/useDiaryQueries";
+import { db } from "@/lib/db";
 
 export default function BackupBanner() {
-    const { store, isLoaded, getStats } = useDiaryStore();
+    const stats = useDiagramStats();
     const [visible, setVisible] = useState(false);
     const [exported, setExported] = useState(false);
 
     useEffect(() => {
-        if (!isLoaded) return;
-        const stats = getStats();
+        if (!stats) return;
         setVisible(shouldShowBackupReminder(stats.entryCount));
-    }, [isLoaded, getStats]);
+    }, [stats]);
 
     if (!visible) return null;
 
-    const handleBackup = () => {
-        exportDiary(store);
+    const handleBackup = async () => {
+        const entries = await db.entries.toArray();
+        exportDiary(entries);
         setExported(true);
         setTimeout(() => {
             setVisible(false);

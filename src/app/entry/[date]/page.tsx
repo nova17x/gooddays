@@ -2,7 +2,8 @@
 
 import { useState, useCallback } from "react";
 import { useParams } from "next/navigation";
-import { useDiaryStore } from "@/hooks/useDiaryStore";
+import { useDiaryActions } from "@/hooks/useDiaryStore";
+import { useDateEntries } from "@/hooks/useDiaryQueries";
 import { formatDateJa } from "@/lib/date-utils";
 import DiaryEditor from "@/components/DiaryEditor";
 import EntryCard from "@/components/EntryCard";
@@ -19,9 +20,9 @@ function isValidDate(dateStr: string): boolean {
 export default function EntryPage() {
   const params = useParams();
   const dateStr = params.date as string;
-  const { getEntries, addEntry, updateEntry, removeEntry, isLoaded } =
-    useDiaryStore();
-  const entries = getEntries(dateStr);
+  const { addEntry, updateEntry, removeEntry } = useDiaryActions();
+  const entries = useDateEntries(dateStr);
+
   const [editingId, setEditingId] = useState<string | null>(null);
   const [addingPrompt, setAddingPrompt] = useState<string | null>(null);
 
@@ -40,7 +41,7 @@ export default function EntryPage() {
     [dateStr, updateEntry]
   );
 
-  if (!isLoaded) {
+  if (!entries) {
     return (
       <div className="text-center py-20 text-text-light">読み込み中...</div>
     );
