@@ -25,7 +25,7 @@ export default function BackupBanner() {
     };
 
     return (
-        <div className="fixed bottom-0 left-0 right-0 z-40 p-4 pointer-events-none">
+        <div className="fixed bottom-20 sm:bottom-0 left-0 right-0 z-40 p-4 pointer-events-none">
             <div className="max-w-2xl mx-auto pointer-events-auto">
                 <div className="bg-bg-card border border-warm-200 rounded-2xl p-4 shadow-lg flex flex-col sm:flex-row items-start sm:items-center gap-3 sm:gap-4">
                     {exported ? (
