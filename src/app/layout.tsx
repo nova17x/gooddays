@@ -32,7 +32,7 @@ export default function RootLayout({
     <html lang="ja">
       <body className={`${zenMaru.variable} font-sans antialiased`}>
         <ErrorBoundary>
-          <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-6 pb-32 sm:pb-24">
+          <div className="max-w-2xl mx-auto px-4 sm:px-6 py-4 sm:py-6 pb-24 sm:pb-24">
             <Header />
             <main>{children}</main>
           </div>

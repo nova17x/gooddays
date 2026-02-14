@@ -13,7 +13,7 @@ export default function BottomNav() {
     ];
 
     return (
-        <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-warm-200 px-6 pt-2 pb-6 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
+        <div className="sm:hidden fixed bottom-0 left-0 right-0 bg-white/95 backdrop-blur-md border-t border-warm-200 px-6 pt-2 pb-3 sm:pb-6 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
             <nav className="flex justify-between items-center max-w-sm mx-auto">
                 {navItems.map((item) => {
                     const isActive = pathname === item.href;
