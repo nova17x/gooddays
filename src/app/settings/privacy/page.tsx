@@ -42,10 +42,6 @@ const SECTIONS = [
             "不具合の報告やご質問は、以下の方法でお気軽にお寄せください。",
         links: [
             {
-                label: "X（Twitter）: @djpwd8",
-                href: "https://x.com/djpwd8",
-            },
-            {
                 label: "GitHub Issues で報告する",
                 href: "https://github.com/nova17x/gooddays/issues",
             },
