@@ -10,7 +10,7 @@ const db = new Dexie('GoodDaysDB') as Dexie & {
 
 // Schema definition
 db.version(1).stores({
-    entries: 'id, date, createdAt' // Primary key and indexed props
+    entries: 'id, date, createdAt, mood' // Primary key and indexed props
 });
 
 export { db };

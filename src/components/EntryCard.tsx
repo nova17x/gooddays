@@ -33,6 +33,7 @@ export default function EntryCard({
       </div>
       {entry.prompt && (
         <p className="text-sm text-warm-400 font-medium mb-1">
+          {entry.mood && <span className="mr-2 text-lg">{entry.mood}</span>}
           {entry.prompt}
         </p>
       )}

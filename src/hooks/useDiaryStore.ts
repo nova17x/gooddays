@@ -12,12 +12,13 @@ function generateId(): string {
 // though we are breaking the API anyway.
 export function useDiaryActions() {
   const addEntry = useCallback(
-    async (date: string, prompt: string, body: string) => {
+    async (date: string, prompt: string, body: string, mood?: string) => {
       const entry: DiaryEntry = {
         id: generateId(),
         date,
         prompt,
         body,
+        mood,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
@@ -27,9 +28,10 @@ export function useDiaryActions() {
   );
 
   const updateEntry = useCallback(
-    async (date: string, id: string, body: string) => {
+    async (date: string, id: string, body: string, mood?: string) => {
       await db.entries.update(id, {
         body,
+        mood,
         updatedAt: new Date().toISOString(),
       });
     },

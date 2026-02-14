@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useMonthEntries, useCalendarEntryDates } from "@/hooks/useDiaryQueries";
+import { useMonthEntries, useCalendarEntriesMap } from "@/hooks/useDiaryQueries";
 import { formatMonthJa } from "@/lib/date-utils";
 import CalendarGrid from "@/components/CalendarGrid";
 import DiaryTimeline from "@/components/DiaryTimeline";
@@ -13,7 +13,7 @@ export default function CalendarPage() {
   const [month, setMonth] = useState(now.getMonth() + 1);
 
   const monthEntries = useMonthEntries(year, month);
-  const entryDates = useCalendarEntryDates(year, month);
+  const calendarEntries = useCalendarEntriesMap(year, month);
 
   const goToPrevMonth = () => {
     if (month === 1) {
@@ -33,7 +33,7 @@ export default function CalendarPage() {
     }
   };
 
-  if (!monthEntries || !entryDates) {
+  if (!monthEntries || !calendarEntries) {
     return (
       <div className="text-center py-20 text-text-light">読み込み中...</div>
     );
@@ -69,7 +69,7 @@ export default function CalendarPage() {
       </div>
 
       <div className="bg-bg-card border border-warm-100 rounded-2xl p-3 sm:p-4 shadow-sm mb-8">
-        <CalendarGrid year={year} month={month} entryDates={entryDates} />
+        <CalendarGrid year={year} month={month} entriesByDate={calendarEntries} />
       </div>
 
       <DiaryTimeline entriesByDate={entriesByDate} sortedDates={sortedDates} />

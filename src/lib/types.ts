@@ -5,6 +5,7 @@ export interface DiaryEntry {
   body: string;
   createdAt: string;
   updatedAt: string;
+  mood?: string;
 }
 
 export type DiaryStore = Record<string, DiaryEntry[]>;

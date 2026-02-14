@@ -25,11 +25,13 @@ export function useMonthEntries(year: number, month: number) {
     }, [year, month]);
 }
 
-export function useCalendarEntryDates(year: number, month: number) {
+import type { DiaryEntry } from "@/lib/types";
+
+export function useCalendarEntriesMap(year: number, month: number) {
     return useLiveQuery(async () => {
         // Get the range of dates displayed in the calendar
         const days = getCalendarDays(year, month);
-        if (days.length === 0) return new Set<string>();
+        if (days.length === 0) return new Map<string, DiaryEntry[]>();
 
         const startDate = days[0].date;
         const endDate = days[days.length - 1].date;
@@ -40,7 +42,14 @@ export function useCalendarEntryDates(year: number, month: number) {
             .between(startDate, endDate, true, true)
             .toArray();
 
-        return new Set(entries.map((e) => e.date));
+        const map = new Map<string, DiaryEntry[]>();
+        for (const e of entries) {
+            const list = map.get(e.date) ?? [];
+            list.push(e);
+            map.set(e.date, list);
+        }
+
+        return map;
     }, [year, month]);
 }
 

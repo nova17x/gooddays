@@ -16,7 +16,7 @@ export default function Header() {
           </h1>
           <p className="text-sm text-text-muted">{APP_TAGLINE}</p>
         </Link>
-        <nav className="flex gap-2 sm:gap-4">
+        <nav className="hidden sm:flex gap-2 sm:gap-4">
           <Link
             href="/"
             className={`text-sm whitespace-nowrap px-3 sm:px-4 py-2 rounded-full transition-colors ${pathname === "/"

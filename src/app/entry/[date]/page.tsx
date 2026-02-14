@@ -27,16 +27,16 @@ export default function EntryPage() {
   const [addingPrompt, setAddingPrompt] = useState<string | null>(null);
 
   const handleAdd = useCallback(
-    (body: string) => {
-      addEntry(dateStr, addingPrompt ?? "", body);
+    (body: string, mood?: string) => {
+      addEntry(dateStr, addingPrompt ?? "", body, mood);
       setAddingPrompt(null);
     },
     [dateStr, addEntry, addingPrompt]
   );
 
   const handleUpdate = useCallback(
-    (id: string, body: string) => {
-      updateEntry(dateStr, id, body);
+    (id: string, body: string, mood?: string) => {
+      updateEntry(dateStr, id, body, mood);
     },
     [dateStr, updateEntry]
   );
@@ -90,8 +90,9 @@ export default function EntryPage() {
               key={entry.id}
               prompt={entry.prompt}
               initialBody={entry.body}
+              initialMood={entry.mood}
               autoSave
-              onSave={(body) => handleUpdate(entry.id, body)}
+              onSave={(body, mood) => handleUpdate(entry.id, body, mood)}
               onCancel={() => setEditingId(null)}
               onDelete={() => {
                 removeEntry(dateStr, entry.id);

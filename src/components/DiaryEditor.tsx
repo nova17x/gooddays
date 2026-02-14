@@ -3,11 +3,15 @@
 import { useState, useEffect, useRef } from "react";
 import { PLACEHOLDER_MESSAGES } from "@/lib/constants";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import confetti from "canvas-confetti";
+
+const MOODS = ["😊", "😐", "😢", "😡", "😌", "🤔", "😴", "🤩"];
 
 interface DiaryEditorProps {
   prompt: string;
   initialBody?: string;
-  onSave: (body: string) => void;
+  initialMood?: string;
+  onSave: (body: string, mood?: string) => void;
   onCancel?: () => void;
   onDelete?: () => void;
   autoSave?: boolean;
@@ -16,16 +20,19 @@ interface DiaryEditorProps {
 export default function DiaryEditor({
   prompt,
   initialBody = "",
+  initialMood,
   onSave,
   onCancel,
   onDelete,
   autoSave = false,
 }: DiaryEditorProps) {
   const [body, setBody] = useState(initialBody);
+  const [mood, setMood] = useState<string | undefined>(initialMood);
   const [saved, setSaved] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const saveTimeoutRef = useRef<ReturnType<typeof setTimeout>>(null);
+  const isFirstRender = useRef(true);
 
   const placeholder =
     PLACEHOLDER_MESSAGES[
@@ -36,16 +43,29 @@ export default function DiaryEditor({
     ) % PLACEHOLDER_MESSAGES.length
     ];
 
+  // Auto-grow textarea
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      textarea.style.height = "auto";
+      textarea.style.height = `${textarea.scrollHeight}px`;
+    }
+  }, [body]);
+
   // Auto-save with debounce (only for existing entries)
   useEffect(() => {
-    if (!autoSave || body === initialBody) return;
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+    if (!autoSave) return;
 
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
 
     saveTimeoutRef.current = setTimeout(() => {
-      onSave(body);
+      onSave(body, mood);
       setSaved(true);
       setTimeout(() => setSaved(false), 2000);
     }, 1000);
@@ -55,10 +75,12 @@ export default function DiaryEditor({
         clearTimeout(saveTimeoutRef.current);
       }
     };
-  }, [body, initialBody, onSave, autoSave]);
+  }, [body, mood, onSave, autoSave]);
 
   // Focus textarea on mount
   useEffect(() => {
+    // Only focus if creating a new entry or explicitly editing?
+    // Current behavior: always focus.
     textareaRef.current?.focus();
   }, []);
 
@@ -67,22 +89,49 @@ export default function DiaryEditor({
     if (saveTimeoutRef.current) {
       clearTimeout(saveTimeoutRef.current);
     }
-    onSave(body);
+    onSave(body, mood);
     setSaved(true);
+
+    // Trigger confetti
+    confetti({
+      particleCount: 100,
+      spread: 70,
+      origin: { y: 0.6 },
+      colors: ['#FFD166', '#06D6A0', '#118AB2', '#EF476F'],
+      disableForReducedMotion: true
+    });
+
     setTimeout(() => setSaved(false), 2000);
   };
 
   return (
-    <div className="bg-bg-card border border-warm-100 rounded-2xl p-4 sm:p-6 shadow-sm">
-      {prompt && (
-        <p className="text-sm text-warm-400 font-medium mb-2">{prompt}</p>
-      )}
+    <div className="bg-bg-card border border-warm-100 rounded-2xl p-4 sm:p-6 shadow-sm transition-all duration-300">
+      <div className="flex flex-col gap-3 mb-3">
+        {prompt && (
+          <p className="text-sm text-warm-400 font-medium">{prompt}</p>
+        )}
+        <div className="flex gap-2 overflow-x-auto pb-2 -mx-2 px-2 scrollbar-none">
+          {MOODS.map((m) => (
+            <button
+              key={m}
+              onClick={() => setMood(m)}
+              className={`text-2xl w-10 h-10 flex items-center justify-center rounded-full transition-all ${mood === m
+                ? "bg-warm-100 scale-110 shadow-sm"
+                : "hover:bg-warm-50 opacity-70 hover:opacity-100"
+                }`}
+            >
+              {m}
+            </button>
+          ))}
+        </div>
+      </div>
+
       <textarea
         ref={textareaRef}
         value={body}
         onChange={(e) => setBody(e.target.value)}
         placeholder={prompt ? "ここに書いてください..." : placeholder}
-        className="w-full min-h-[120px] p-3 rounded-xl border border-warm-200 bg-white/80 text-text placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-warm-300 focus:border-transparent resize-y leading-relaxed transition-shadow"
+        className="w-full min-h-[120px] p-3 rounded-xl border border-warm-200 bg-white/80 text-text placeholder:text-text-light focus:outline-none focus:ring-2 focus:ring-warm-300 focus:border-transparent resize-none leading-relaxed transition-shadow overflow-hidden"
       />
       <div className="flex flex-wrap items-center justify-between mt-3 gap-2">
         <span
