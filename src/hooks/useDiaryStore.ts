@@ -1,62 +1,39 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useEffect, useMemo, useCallback } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
 import type { DiaryEntry, DiaryStore } from "@/lib/types";
-import { STORAGE_KEY } from "@/lib/constants";
+import { db } from "@/lib/db";
+import { migrateFromLocalStorage } from "@/lib/migration";
 
 function generateId(): string {
   return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 }
 
 export function useDiaryStore() {
-  const [store, setStore] = useState<DiaryStore>({});
-  const [isLoaded, setIsLoaded] = useState(false);
-
+  // Try to migrate data on mount
   useEffect(() => {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (raw) {
-      try {
-        const parsed = JSON.parse(raw);
-        const migrated: DiaryStore = {};
-        for (const [key, value] of Object.entries(parsed)) {
-          if (Array.isArray(value)) {
-            migrated[key] = value as DiaryEntry[];
-          } else if (
-            typeof value === "object" &&
-            value !== null &&
-            "body" in value
-          ) {
-            const old = value as {
-              date: string;
-              body: string;
-              createdAt: string;
-              updatedAt: string;
-            };
-            migrated[key] = [
-              {
-                id: generateId(),
-                date: old.date,
-                prompt: "",
-                body: old.body,
-                createdAt: old.createdAt,
-                updatedAt: old.updatedAt,
-              },
-            ];
-          }
-        }
-        setStore(migrated);
-      } catch {
-        localStorage.removeItem(STORAGE_KEY);
-      }
-    }
-    setIsLoaded(true);
+    migrateFromLocalStorage();
   }, []);
 
-  useEffect(() => {
-    if (isLoaded) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(store));
+  // Live query to get all entries
+  const allEntries = useLiveQuery(() => db.entries.toArray());
+  const isLoaded = allEntries !== undefined;
+
+  // Transform array to Record<date, entries[]>
+  const store = useMemo(() => {
+    if (!allEntries) return {};
+    const newStore: DiaryStore = {};
+    for (const entry of allEntries) {
+      if (!newStore[entry.date]) {
+        newStore[entry.date] = [];
+      }
+      newStore[entry.date].push(entry);
     }
-  }, [store, isLoaded]);
+    // Sort entries for each day? Usually not needed if appended, but let's be safe
+    // The previous implementation added to the end.
+    return newStore;
+  }, [allEntries]);
 
   const getEntries = useCallback(
     (date: string): DiaryEntry[] => store[date] ?? [],
@@ -64,7 +41,7 @@ export function useDiaryStore() {
   );
 
   const addEntry = useCallback(
-    (date: string, prompt: string, body: string) => {
+    async (date: string, prompt: string, body: string) => {
       const entry: DiaryEntry = {
         id: generateId(),
         date,
@@ -73,49 +50,34 @@ export function useDiaryStore() {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      setStore((prev) => ({
-        ...prev,
-        [date]: [...(prev[date] ?? []), entry],
-      }));
+      await db.entries.add(entry);
     },
     []
   );
 
   const updateEntry = useCallback(
-    (date: string, id: string, body: string) => {
-      setStore((prev) => ({
-        ...prev,
-        [date]: (prev[date] ?? []).map((e) =>
-          e.id === id
-            ? { ...e, body, updatedAt: new Date().toISOString() }
-            : e
-        ),
-      }));
+    async (date: string, id: string, body: string) => {
+      await db.entries.update(id, {
+        body,
+        updatedAt: new Date().toISOString(),
+      });
     },
     []
   );
 
-  const removeEntry = useCallback((date: string, id: string) => {
-    setStore((prev) => {
-      const entries = (prev[date] ?? []).filter((e) => e.id !== id);
-      if (entries.length === 0) {
-        const next = { ...prev };
-        delete next[date];
-        return next;
-      }
-      return { ...prev, [date]: entries };
-    });
+  const removeEntry = useCallback(async (date: string, id: string) => {
+    await db.entries.delete(id);
   }, []);
 
   const getEntriesForMonth = useCallback(
     (year: number, month: number): DiaryEntry[] => {
       const prefix = `${year}-${String(month).padStart(2, "0")}`;
-      return Object.values(store)
-        .flat()
+      if (!allEntries) return [];
+      return allEntries
         .filter((e) => e.date.startsWith(prefix))
         .sort((a, b) => b.date.localeCompare(a.date));
     },
-    [store]
+    [allEntries]
   );
 
   const hasEntry = useCallback(
@@ -123,17 +85,20 @@ export function useDiaryStore() {
     [store]
   );
 
-  const replaceStore = useCallback((newStore: DiaryStore) => {
-    setStore(newStore);
+  const replaceStore = useCallback(async (newStore: DiaryStore) => {
+    const entries = Object.values(newStore).flat();
+    await db.transaction("rw", db.entries, async () => {
+      await db.entries.clear();
+      await db.entries.bulkAdd(entries);
+    });
   }, []);
 
   const getStats = useCallback((): { dayCount: number; entryCount: number } => {
-    const days = Object.keys(store).filter(
-      (key) => store[key] && store[key].length > 0
-    );
-    const entries = days.reduce((sum, key) => sum + store[key].length, 0);
-    return { dayCount: days.length, entryCount: entries };
-  }, [store]);
+    if (!allEntries) return { dayCount: 0, entryCount: 0 };
+    // Unique days
+    const days = new Set(allEntries.map((e) => e.date));
+    return { dayCount: days.size, entryCount: allEntries.length };
+  }, [allEntries]);
 
   return {
     store,
