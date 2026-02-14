@@ -55,9 +55,9 @@ export default function Home() {
           </svg>
         </button>
 
-        <h2 className="text-lg font-medium text-text-muted">
+        <h2 className="text-lg font-medium text-text-muted flex flex-col items-center">
           {formatDateJa(dateStr)}
-          {dateStr === today && <span className="ml-2 text-xs bg-warm-200 text-warm-600 px-2 py-0.5 rounded-full">今日</span>}
+          {dateStr === today && <span className="text-[10px] sm:text-xs bg-warm-200 text-warm-600 px-2 py-0.5 rounded-full mt-1">今日</span>}
         </h2>
 
         <button
