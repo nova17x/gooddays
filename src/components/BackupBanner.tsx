@@ -1,33 +1,27 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { shouldShowBackupReminder, exportDiary } from "@/lib/backup";
 import { useDiagramStats } from "@/hooks/useDiaryQueries";
 import { db } from "@/lib/db";
 
 export default function BackupBanner() {
     const stats = useDiagramStats();
-    const [visible, setVisible] = useState(false);
+    const [dismissed, setDismissed] = useState(false);
     const [exported, setExported] = useState(false);
 
-    useEffect(() => {
-        if (!stats) return;
-        setVisible(shouldShowBackupReminder(stats.entryCount));
-    }, [stats]);
+    const show = !dismissed && !exported && stats && shouldShowBackupReminder(stats.entryCount);
 
-    if (!visible) return null;
+    if (!show) return null;
 
     const handleBackup = async () => {
         const entries = await db.entries.toArray();
         exportDiary(entries);
         setExported(true);
-        setTimeout(() => {
-            setVisible(false);
-        }, 2000);
     };
 
     const handleDismiss = () => {
-        setVisible(false);
+        setDismissed(true);
     };
 
     return (
