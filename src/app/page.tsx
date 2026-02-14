@@ -75,7 +75,7 @@ export default function Home() {
         </button>
       </div>
 
-      {addingPrompt === null && (
+      {addingPrompt === null && editingId === null && (
         <div className="mb-6">
           <PromptChips
             onSelect={(promptText) => {
@@ -93,21 +93,31 @@ export default function Home() {
       {entries.length === 0 && addingPrompt === null && <EmptyState />}
 
       <div className="space-y-4">
-        {entries.map((entry) =>
-          editingId === entry.id ? (
-            <DiaryEditor
-              key={entry.id}
-              prompt={entry.prompt}
-              initialBody={entry.body}
-              autoSave
-              onSave={(body) => handleUpdate(entry.id, body)}
-              onCancel={() => setEditingId(null)}
-              onDelete={() => {
-                removeEntry(dateStr, entry.id);
-                setEditingId(null);
-              }}
-            />
-          ) : (
+        {editingId !== null ? (
+          entries
+            .filter((entry) => entry.id === editingId)
+            .map((entry) => (
+              <DiaryEditor
+                key={entry.id}
+                prompt={entry.prompt}
+                initialBody={entry.body}
+                autoSave
+                onSave={(body) => handleUpdate(entry.id, body)}
+                onCancel={() => setEditingId(null)}
+                onDelete={() => {
+                  removeEntry(dateStr, entry.id);
+                  setEditingId(null);
+                }}
+              />
+            ))
+        ) : addingPrompt !== null ? (
+          <DiaryEditor
+            prompt={addingPrompt}
+            onSave={handleAdd}
+            onCancel={() => setAddingPrompt(null)}
+          />
+        ) : (
+          entries.map((entry) => (
             <EntryCard
               key={entry.id}
               entry={entry}
@@ -116,19 +126,9 @@ export default function Home() {
                 setAddingPrompt(null);
               }}
             />
-          )
+          ))
         )}
       </div>
-
-      {addingPrompt !== null && (
-        <div className={entries.length > 0 ? "mt-4" : ""}>
-          <DiaryEditor
-            prompt={addingPrompt}
-            onSave={handleAdd}
-            onCancel={() => setAddingPrompt(null)}
-          />
-        </div>
-      )}
     </div>
   );
 }

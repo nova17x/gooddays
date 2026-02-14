@@ -62,7 +62,7 @@ export default function EntryPage() {
     <div>
       <p className="text-sm text-text-muted mb-4">{formatDateJa(dateStr)}</p>
 
-      {addingPrompt === null && (
+      {addingPrompt === null && editingId === null && (
         <div className="mb-6">
           <PromptChips
             onSelect={(promptText) => {
@@ -77,28 +77,38 @@ export default function EntryPage() {
         </div>
       )}
 
-      {entries.length === 0 && addingPrompt === null && (
+      {entries.length === 0 && addingPrompt === null && editingId === null && (
         <p className="text-center text-text-light text-sm py-8">
           この日の日記はまだありません
         </p>
       )}
 
       <div className="space-y-4">
-        {entries.map((entry) =>
-          editingId === entry.id ? (
-            <DiaryEditor
-              key={entry.id}
-              prompt={entry.prompt}
-              initialBody={entry.body}
-              autoSave
-              onSave={(body) => handleUpdate(entry.id, body)}
-              onCancel={() => setEditingId(null)}
-              onDelete={() => {
-                removeEntry(dateStr, entry.id);
-                setEditingId(null);
-              }}
-            />
-          ) : (
+        {editingId !== null ? (
+          entries
+            .filter((entry) => entry.id === editingId)
+            .map((entry) => (
+              <DiaryEditor
+                key={entry.id}
+                prompt={entry.prompt}
+                initialBody={entry.body}
+                autoSave
+                onSave={(body) => handleUpdate(entry.id, body)}
+                onCancel={() => setEditingId(null)}
+                onDelete={() => {
+                  removeEntry(dateStr, entry.id);
+                  setEditingId(null);
+                }}
+              />
+            ))
+        ) : addingPrompt !== null ? (
+          <DiaryEditor
+            prompt={addingPrompt}
+            onSave={handleAdd}
+            onCancel={() => setAddingPrompt(null)}
+          />
+        ) : (
+          entries.map((entry) => (
             <EntryCard
               key={entry.id}
               entry={entry}
@@ -107,19 +117,9 @@ export default function EntryPage() {
                 setAddingPrompt(null);
               }}
             />
-          )
+          ))
         )}
       </div>
-
-      {addingPrompt !== null && (
-        <div className={entries.length > 0 ? "mt-4" : ""}>
-          <DiaryEditor
-            prompt={addingPrompt}
-            onSave={handleAdd}
-            onCancel={() => setAddingPrompt(null)}
-          />
-        </div>
-      )}
     </div>
   );
 }
