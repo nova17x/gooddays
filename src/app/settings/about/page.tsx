@@ -79,15 +79,6 @@ export default function AboutPage() {
                         <span>📦</span>
                         <span className="underline underline-offset-2">GitHub リポジトリ</span>
                     </a>
-                    <a
-                        href="https://x.com/djpwd8"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center gap-2 text-sm text-warm-500 hover:text-warm-600 transition-colors"
-                    >
-                        <span>🐦</span>
-                        <span className="underline underline-offset-2">開発者 X（Twitter）</span>
-                    </a>
                 </div>
             </div>
         </div>
